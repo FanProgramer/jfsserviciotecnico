@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Punto de Venta</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .table-actions {
+            white-space: nowrap;
+        }
+        .table-actions .btn {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="/">Punto de Venta</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/registro_productos">Registrar Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inventario">Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reportes">Reportes de Ventas</a>
+                </li>
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registro_cajeros">Registrar Cajero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/cajeros">Gestionar Cajeros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registro de Administradores</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="navbar-text">
+                            Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registrar Admin</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Inventario</h1>
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Precio de Venta</th>
+                        <th scope="col">Costo</th>
+                        <th scope="col">Stock</th>
+                        <th scope="col" class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for producto in productos %}
+                    <tr>
+                        <td>{{ producto[0] }}</td>
+                        <td>{{ producto[1] }}</td>
+                        <td>${{ producto[3] }}</td>
+                        <td>${{ producto[2] }}</td>
+                        <td>{{ producto[4] }}</td>
+                        <td class="table-actions">
+                            <a href="/editar_producto/{{ producto[0] }}" class="btn btn-sm btn-info">Editar</a>
+                            <a href="/agregar_stock/{{ producto[0] }}" class="btn btn-sm btn-primary">Agregar Stock</a>
+                            <form action="/eliminar_producto/{{ producto[0] }}" method="post" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    <tr>
+                        <td colspan="3"></td>
+                        <td><strong>Total de Costo:</strong></td>
+                        <td><strong>${{ total_costo }}</strong></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

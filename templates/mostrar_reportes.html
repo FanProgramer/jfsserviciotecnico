@@ -1,0 +1,34 @@
+<!-- mostrar_reportes.html -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mostrar Reportes</title>
+</head>
+<body>
+    <h1>Reportes de Ventas y Productos Bajo Stock</h1>
+
+    <!-- Aquí mostrar el reporte de ventas -->
+    <h2>Reporte de Ventas</h2>
+    <ul>
+        {% for venta in ventas %}
+            <li>{{ venta[0] }}: ${{ venta[1] }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Aquí mostrar el reporte de productos bajo stock -->
+    <h2>Productos Bajo Stock</h2>
+    <ul>
+        {% for producto in productos_bajo_stock %}
+            <li>{{ producto[1] }} - Stock: {{ producto[2] }}</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Agregar botón para exportar ventas -->
+    <form action="{{ url_for('exportar_ventas_csv') }}" method="get">
+        <button type="submit">Exportar Ventas a CSV</button>
+    </form>
+</body>
+</html>

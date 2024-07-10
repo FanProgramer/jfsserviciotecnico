@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Clientes - Punto de Venta</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Estilos personalizados */
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .list-group-item {
+            border-color: #ccc;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="/">Punto de Venta</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/registro_productos">Registrar Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inventario">Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reportes">Reportes de Ventas</a>
+                </li>
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registro_cajeros">Registrar Cajero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/cajeros">Gestionar Cajeros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registro de Administradores</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="navbar-text">
+                            Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registrar Admin</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Formulario para agregar cliente -->
+    <div class="container mt-5">
+        <h1 class="text-center">Agregar Cliente</h1>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <form id="formAgregarCliente" action="/agregar_cliente" method="post">
+                            <div class="form-group">
+                                <label for="nombre">Nombre:</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Teléfono:</label>
+                                <input type="text" class="form-control" id="telefono" name="telefono" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Agregar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Buscar Cliente -->
+    <div class="container mt-5">
+        <h2 class="text-center">Buscar Cliente</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form id="formBuscarCliente" action="/buscar_cliente" method="post">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="buscar" name="buscar" placeholder="Nombre, email, teléfono...">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Buscar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Resultados de la búsqueda de clientes -->
+    <div class="container mt-5">
+        <h2 class="text-center">Resultados de la Búsqueda</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <ul id="listaResultados" class="list-group mt-3">
+                    {% for cliente in resultados %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ cliente[1] }} - {{ cliente[2] }} - {{ cliente[3] }}
+                        <button class="btn btn-danger btn-sm" onclick="eliminarCliente('{{ cliente[0] }}')">Eliminar</button>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de todos los clientes -->
+    <div class="container mt-5">
+        <h2 class="text-center">Lista de Clientes</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <ul id="listaClientes" class="list-group mt-3">
+                    {% for cliente in clientes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ cliente[1] }} - {{ cliente[2] }} - {{ cliente[3] }}
+                        <td>
+                            <form action="/eliminar_cliente/{{ cliente[0] }}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar este cliente?');">
+                                <button type="submit" class="btn btn-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de compras de clientes -->
+    <div class="container mt-5">
+        <h2 class="text-center">Historial de Compras</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <ul class="list-group mt-3">
+                    {% for venta in historial_compras %}
+                    <li class="list-group-item">{{ venta[4] }} - {{ venta[1] }} - {{ venta[2] }} - {{ venta[3] }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Script para manejar la eliminación de clientes -->
+    <script>
+        function eliminarCliente(clienteId) {
+            if (confirm("¿Estás seguro de eliminar este cliente?")) {
+                // Petición AJAX para eliminar el cliente
+                $.ajax({
+                    url: '/eliminar_cliente',
+                    type: 'POST',
+                    data: { cliente_id: clienteId },
+                    success: function(response) {
+                        // Eliminar el elemento de la lista en el frontend
+                        alert("Cliente eliminado exitosamente.");
+                        // Actualizar la lista de clientes si es necesario
+                        // Aquí puedes recargar la lista de clientes o realizar otras acciones
+                        // Por ejemplo, eliminar el elemento del DOM
+                        $("#listaClientes li").each(function() {
+                            if ($(this).text().includes(clienteId)) {
+                                $(this).remove();
+                            }
+                        });
+                        $("#listaResultados li").each(function() {
+                            if ($(this).text().includes(clienteId)) {
+                                $(this).remove();
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error al intentar eliminar el cliente.");
+                        console.error(xhr.responseText);
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

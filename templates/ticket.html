@@ -1,0 +1,62 @@
+<!-- ticket.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        .ticket-container {
+            width: 300px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .ticket-item {
+            margin-bottom: 5px;
+        }
+        .btn-imprimir {
+            display: block;
+            margin: 20px auto;
+        }
+
+        /* Estilos para ocultar el botón de impresión en la versión impresa */
+        @media print {
+            .btn-imprimir {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <h2>Tecno JFS</h2>
+        <p>Teléfono del Local</p>
+        <p>Serrano 2421 V.Rosa Pilar, Bs. As</p>
+        <hr>
+        <h3>Ticket de Venta</h3>
+        <div class="ticket-item">
+            <p>Productos:</p>
+            <ul>
+                {% for producto in productos %}
+                <li>{{ producto.nombre }} - {{ producto.cantidad }} x ${{ producto.precio }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <hr>
+        <p>Total: ${{ total }}</p>
+        <hr>
+        <p>¡Gracias por tu compra!</p>
+        <button id="btnImprimir" class="btn-imprimir">Imprimir Ticket</button>
+    </div>
+
+    <script>
+        document.getElementById('btnImprimir').addEventListener('click', function() {
+            window.print();
+            setTimeout(function() {
+                window.location.href = "/"; // Redirigir a la página de inicio después de 1 segundo
+            }, 1000); // Esperar 1 segundo antes de redirigir (1000 milisegundos)
+        });
+    </script>
+</body>
+</html>

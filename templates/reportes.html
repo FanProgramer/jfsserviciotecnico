@@ -1,0 +1,115 @@
+<!-- templates/reportes.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes de Ventas - Punto de Venta</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="/">Punto de Venta</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/registro_productos">Registrar Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inventario">Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reportes">Reportes de Ventas</a>
+                </li>
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registro_cajeros">Registrar Cajero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/cajeros">Gestionar Cajeros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registro de Administradores</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="navbar-text">
+                            Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registrar Admin</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="my-5 text-center">Reportes de Ventas</h1>
+        <form method="POST" action="{{ url_for('reportes') }}" class="mb-4">
+            <div class="form-row">
+                <div class="col">
+                    <label for="fecha_inicio">Fecha de Inicio:</label>
+                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                </div>
+                <div class="col">
+                    <label for="fecha_fin">Fecha de Fin:</label>
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Buscar</button>
+        </form>
+        <form method="GET" action="{{ url_for('ver_reporte_ventas_pdf') }}">
+            <input type="hidden" name="fecha_inicio" value="{{ request.form['fecha_inicio'] }}">
+            <input type="hidden" name="fecha_fin" value="{{ request.form['fecha_fin'] }}">
+            <button type="submit" class="btn btn-success">Exportar a PDF</button>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>ID Venta</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr>
+                        <td>{{ venta['id'] }}</td>
+                        <td>{{ venta['producto'] }}</td>
+                        <td>{{ venta['cantidad'] }}</td>
+                        <td>{{ venta['total'] }}</td>
+                        <td>{{ venta['fecha'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

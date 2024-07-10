@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Punto de Venta - Inicio</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Punto de Venta</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/registro_productos">Registrar Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inventario">Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reportes">Reportes de Ventas</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center">J.F.S Punto de Venta</h1>
+
+        <!-- Formulario para buscar producto -->
+        <form action="/buscar_producto" method="post" class="mt-5">
+            <div class="form-group">
+                <label for="buscar">Buscar Producto a Vender:</label>
+                <input type="text" class="form-control" id="buscar" name="nombre" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+
+        <!-- Resultados de la búsqueda de productos -->
+        <h2 class="text-center mt-5">Resultados de la Búsqueda</h2>
+        <ul class="list-group mt-3">
+            {% for producto in productos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ producto[1] }} - ${{ producto[2] }}
+                <form class="agregar-producto-form" data-precio="{{ producto[2] }}" data-producto-id="{{ producto[0] }}" data-producto-nombre="{{ producto[1] }}">
+                    <input type="number" name="cantidad" min="1" value="1" class="cantidad">
+                    <button type="button" class="btn btn-primary agregar-producto">Agregar a la Venta</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Mostrar los productos agregados -->
+        <h2 class="text-center mt-5">Productos Agregados</h2>
+        <ul class="list-group mt-3" id="productos-agregados">
+            {% for producto in productos_agregados %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ producto.nombre }} - ${{ producto.precio }} - Cantidad: {{ producto.cantidad }}
+                <form action="/quitar_producto" method="post">
+                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                    <button type="submit" class="btn btn-danger">Quitar</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Mostrar el total calculado -->
+        <div id="totalContainer" class="mt-4">
+            <h4>Total a cobrar: $<span id="total">{{ total }}</span></h4>
+        </div>
+
+        <!-- Formulario para realizar la venta -->
+        <form action="/realizar_venta" method="post" class="mt-5">
+            <button type="submit" class="btn btn-success">Realizar Venta</button>
+        </form>
+
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="list-group mt-3">
+                    {% for category, message in messages %}
+                        <li class="list-group-item list-group-item-{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Mostrar ganancias del día -->
+        <h2 class="text-center mt-5">Ganancias del Día: ${{ ganancias_dia }}</h2>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.agregar-producto').forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = button.closest('form');
+                    const productoId = form.dataset.productoId;
+                    const productoNombre = form.dataset.productoNombre;
+                    const cantidad = form.querySelector('input[name="cantidad"]').value;
+                    const precio = form.dataset.precio;
+
+                    fetch('/agregar_producto', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            producto_id: productoId,
+                            nombre: productoNombre,
+                            cantidad: cantidad,
+                            precio: precio
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Actualizar la lista de productos agregados
+                        const productosAgregados = document.getElementById('productos-agregados');
+                        productosAgregados.innerHTML = '';
+                        data.productos_agregados.forEach(producto => {
+                            const listItem = document.createElement('li');
+                            listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                            listItem.innerHTML = `
+                                ${producto.nombre} - $${producto.precio} - Cantidad: ${producto.cantidad}
+                                <form action="/quitar_producto" method="post">
+                                    <input type="hidden" name="producto_id" value="${producto.id}">
+                                    <button type="submit" class="btn btn-danger">Quitar</button>
+                                </form>
+                            `;
+                            productosAgregados.appendChild(listItem);
+                        });
+
+                        // Actualizar el total
+                        document.getElementById('total').innerText = data.total.toFixed(2);
+                    });
+                });
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

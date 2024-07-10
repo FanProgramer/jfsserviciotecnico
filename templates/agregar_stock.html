@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agregar Stock</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+          integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    
+<div class="container">
+    <h2 class="mb-4">Agregar Stock para {{ nombre_producto }}</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="cantidad">Cantidad a Agregar</label>
+            <input type="number" class="form-control" id="cantidad" name="cantidad" required min="1">
+        </div>
+        <button type="submit" class="btn btn-primary">Agregar Stock</button>
+    </form>
+</div>
+</body>
+</html>

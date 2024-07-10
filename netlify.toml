@@ -1,0 +1,6 @@
+[build]
+  command = "gunicorn -b :5000 app:app"
+  publish = "templates"
+
+[context.production.environment]
+  PYTHON_VERSION = "3.8"
