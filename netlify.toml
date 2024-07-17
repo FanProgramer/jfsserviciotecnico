@@ -1,5 +1,5 @@
 [build]
-command = "pip install -r requirements.txt && gunicorn -b :$PORT app:app"
+command = "python app.py"
 publish = "/opt/build/repo/templates/templates"
 
 
