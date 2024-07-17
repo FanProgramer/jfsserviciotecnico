@@ -1,6 +1,7 @@
 [build]
-  command = ""
-  publish = "templates"
+command = "pip install -r requirements.txt && gunicorn -b :$PORT app:app"
+publish = "templates"
+
 
 [context.production.environment]
   PYTHON_VERSION = "3.8"
