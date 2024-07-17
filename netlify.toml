@@ -1,5 +1,5 @@
 [build]
-  command = "gunicorn -b :5000 app:app"
+  command = ""
   publish = "templates"
 
 [context.production.environment]
