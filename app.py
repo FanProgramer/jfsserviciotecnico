@@ -16,6 +16,8 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
+import tornado.ioloop
+import tornado.web
 
 
 
@@ -919,11 +921,21 @@ def modificar_cliente(id):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.write("Hello, Tornado!")
 
+def make_app():
+    return tornado.web.Application([
+        (r"/", MainHandler),
+    ])
 
 
 # Ejecutar la aplicación
 if __name__ == '__main__':
     setup_db()
     app.run(debug=True)
+    app = make_app()
+    app.listen(5000)  # Escucha en el puerto 5000
+    tornado.ioloop.IOLoop.current().start()
     
