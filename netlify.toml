@@ -1,5 +1,5 @@
 [build]
-command = "python app.py"
+command = "app.py"
 publish = "/opt/build/repo/templates/templates"
 
 
