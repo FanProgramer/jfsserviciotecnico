@@ -1,6 +1,6 @@
 [build]
 command = "pip install -r requirements.txt && gunicorn -b :$PORT app:app"
-publish = "templates"
+publish = "/opt/build/repo/templates/templates"
 
 
 [context.production.environment]
