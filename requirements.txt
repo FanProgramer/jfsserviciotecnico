@@ -19,7 +19,7 @@ flask_weasyprint
 fonttools
 fpdf
 greenlet
-
+gunicorn
 html5lib
 idna
 itsdangerous
