@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>J.F.S Punto de Venta - Inicio</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 4.5rem; /* Ajuste para la barra de navegación fija */
+        }
+        .buscar-form {
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+        .productos-list {
+            max-width: 600px;
+            margin: auto;
+        }
+        #totalContainer {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .accion-form {
+            margin-top: 10px;
+        }
+        .mensaje-flash {
+            max-width: 600px;
+            margin: auto;
+        }
+        .ganancias-dia {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Barra de navegación -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="/">Punto de Venta</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/registro_productos">Registrar Producto</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/inventario">Inventario</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/clientes">Clientes</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/reportes">Reportes de Ventas</a>
+                </li>
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/registro_cajeros">Registrar Cajero</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/cajeros">Gestionar Cajeros</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registro de Administradores</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <span class="navbar-text">
+                            Bienvenido, {{ current_user.username }}
+                        </span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Cerrar Sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Iniciar Sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register_admin">Registrar Admin</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h1 class="text-center">J.F.S Punto de Venta</h1>
+
+        <!-- Formulario para buscar producto -->
+        <form action="/buscar_producto" method="post" class="buscar-form mt-5">
+            <div class="form-group">
+                <label for="buscar">Buscar Producto a Vender:</label>
+                <input type="text" class="form-control" id="buscar" name="nombre" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+
+        <!-- Resultados de la búsqueda de productos -->
+        <h2 class="text-center mt-5">Resultados de la Búsqueda</h2>
+        <ul class="list-group productos-list mt-3">
+            {% for producto in productos %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ producto[1] }} - ${{ producto[2] }}
+                <form class="agregar-producto-form" data-precio="{{ producto[2] }}" data-producto-id="{{ producto[0] }}" data-producto-nombre="{{ producto[1] }}">
+                    <input type="number" name="cantidad" min="1" value="1" class="form-control cantidad">
+                    <button type="button" class="btn btn-primary agregar-producto ml-2">Agregar a la Venta</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Mostrar los productos agregados -->
+        <h2 class="text-center mt-5">Productos Agregados</h2>
+        <ul class="list-group productos-list mt-3" id="productos-agregados">
+            {% for producto in productos_agregados %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ producto.nombre }} - ${{ producto.precio }} - Cantidad: {{ producto.cantidad }}
+                <form action="/quitar_producto" method="post">
+                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                    <button type="submit" class="btn btn-danger">Quitar</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Mostrar el total calculado -->
+        <div id="totalContainer" class="text-center mt-4">
+            <h4>Total a cobrar: $<span id="total">{{ total }}</span></h4>
+        </div>
+
+        <!-- Formulario para realizar la venta -->
+        <form action="/realizar_venta" method="post" class="accion-form mt-5 text-center">
+            <button type="submit" class="btn btn-success">Realizar Venta</button>
+        </form>
+
+        <!-- Botón para ver el último ticket de venta -->
+        <form action="/ver_ultimo_ticket" method="get" class="accion-form mt-3 text-center">
+            <button type="submit" class="btn btn-info">Ver Último Ticket de Venta</button>
+        </form>
+
+        <!-- Mostrar mensajes flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mensaje-flash mt-3">
+                    <ul class="list-group">
+                        {% for category, message in messages %}
+                            <li class="list-group-item list-group-item-{{ category }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Mostrar ganancias del día -->
+        <h2 class="ganancias-dia mt-5">Ganancias del Día: ${{ ganancias_dia }}</h2>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.agregar-producto').forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = button.closest('form');
+                    const productoId = form.dataset.productoId;
+                    const productoNombre = form.dataset.productoNombre;
+                    const cantidad = form.querySelector('input[name="cantidad"]').value;
+                    const precio = form.dataset.precio;
+
+                    fetch('/agregar_producto', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            producto_id: productoId,
+                            nombre: productoNombre,
+                            cantidad: cantidad,
+                            precio: precio
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Actualizar la lista de productos agregados
+                        const productosAgregados = document.getElementById('productos-agregados');
+                        productosAgregados.innerHTML = '';
+                        data.productos_agregados.forEach(producto => {
+                            const listItem = document.createElement('li');
+                            listItem.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+                            listItem.innerHTML = `
+                                ${producto.nombre} - $${producto.precio} - Cantidad: ${producto.cantidad}
+                                <form action="/quitar_producto" method="post">
+                                    <input type="hidden" name="producto_id" value="${producto.id}">
+                                    <button type="submit" class="btn btn-danger">Quitar</button>
+                                </form>
+                            `;
+                            productosAgregados.appendChild(listItem);
+                        });
+
+                        // Actualizar el total
+                        document.getElementById('total').innerText = data.total.toFixed(2);
+                    });
+                });
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
